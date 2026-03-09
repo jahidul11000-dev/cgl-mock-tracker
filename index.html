@@ -101,7 +101,26 @@
         .sunday-slot { background-color: rgba(244, 63, 94, 0.05); text-align: center; padding: 12px; border-radius: 10px; font-weight: 700; color: var(--accent-hot); margin-top: 15px; border: 2px dashed rgba(244, 63, 94, 0.3); }
 
         /* Floating Window Tracker */
-        .floating-countdown { position: fixed; bottom: 30px; right: 30px; background: var(--card-bg); color: var(--primary-text); padding: 15px 25px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); z-index: 100; text-align: right; border-left: 5px solid var(--accent-hot); transition: all 0.3s; }
+        .floating-countdown { 
+            position: fixed; 
+            bottom: 30px; 
+            right: 30px; 
+            background: var(--card-bg); 
+            color: var(--primary-text); 
+            padding: 15px 25px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+            z-index: 1000; /* Increased to ensure it stays on top */
+            text-align: right; 
+            border-left: 5px solid var(--accent-hot); 
+            transition: background 0.3s; /* Removed 'all' transition so dragging is smooth */
+            cursor: grab;
+            user-select: none; /* Prevents text highlighting while dragging */
+            touch-action: none; /* Prevents screen scrolling when dragging on mobile */
+        }
+        .floating-countdown:active {
+            cursor: grabbing;
+        }
         .countdown-label { font-size: 0.8rem; color: var(--secondary-text); text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 2px; }
         .countdown-display { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--success-color); }
 
@@ -153,7 +172,8 @@
     <div class="chart-container"><canvas id="scoreChart" height="80"></canvas></div>
     <div class="grid-container" id="scheduleGrid"></div>
 
-    <div class="floating-countdown">
+    <div class="floating-countdown"
+        id="draggableTimer">
         <div class="countdown-label" id="windowLabel">Loading...</div>
         <div class="countdown-display" id="windowCountdown">--:--:--</div>
     </div>
@@ -507,7 +527,60 @@
         }
 
         setInterval(updateWindowTracker, 1000); updateWindowTracker(); updateAnalytics();
+// --- DRAGGABLE TIMER LOGIC ---
+        const dragItem = document.getElementById("draggableTimer");
+        let active = false;
+        let currentX, currentY, initialX, initialY;
+        let xOffset = 0, yOffset = 0;
 
+        // Desktop Mouse Events
+        dragItem.addEventListener("mousedown", dragStart, false);
+        document.addEventListener("mouseup", dragEnd, false);
+        document.addEventListener("mousemove", drag, false);
+
+        // Mobile Touch Events
+        dragItem.addEventListener("touchstart", dragStart, {passive: false});
+        document.addEventListener("touchend", dragEnd, false);
+        document.addEventListener("touchmove", drag, {passive: false});
+
+        function dragStart(e) {
+            if (e.type === "touchstart") {
+                initialX = e.touches[0].clientX - xOffset;
+                initialY = e.touches[0].clientY - yOffset;
+            } else {
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+            }
+            if (e.target === dragItem || dragItem.contains(e.target)) {
+                active = true;
+            }
+        }
+
+        function dragEnd(e) {
+            initialX = currentX;
+            initialY = currentY;
+            active = false;
+        }
+
+        function drag(e) {
+            if (active) {
+                e.preventDefault(); // Stop screen from moving
+                if (e.type === "touchmove") {
+                    currentX = e.touches[0].clientX - initialX;
+                    currentY = e.touches[0].clientY - initialY;
+                } else {
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+                }
+                xOffset = currentX;
+                yOffset = currentY;
+                setTranslate(currentX, currentY, dragItem);
+            }
+        }
+
+        function setTranslate(xPos, yPos, el) {
+            el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+        }
     </script>
 </body>
 </html>
