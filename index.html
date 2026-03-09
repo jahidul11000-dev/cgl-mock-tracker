@@ -252,24 +252,30 @@
 
         // --- GRID GENERATION ---
         const startDate = new Date(2026, 2, 9); 
-        const days = [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26];
-        let allShifts = [];
-        days.forEach(day => {
-            allShifts.push(`Sept ${day}, Shift 1`);
-            allShifts.push(`Sept ${day}, Shift 2`);
-            allShifts.push(`Sept ${day}, Shift 3`);
-        });
-
-        if(!localStorage.getItem('shuffledShifts')) {
-            for (let i = allShifts.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [allShifts[i], allShifts[j]] = [allShifts[j], allShifts[i]];
-            }
-            localStorage.setItem('shuffledShifts', JSON.stringify(allShifts));
-        } else {
-            allShifts = JSON.parse(localStorage.getItem('shuffledShifts'));
-        }
-
+        
+        // --- THE MASTER SCHEDULE ---
+        // Pre-randomized so everyone in the group gets the exact same order
+        const allShifts = [
+            "Sept 18, Shift 2", "Sept 12, Shift 3", "Sept 24, Shift 1", 
+            "Sept 15, Shift 1", "Sept 21, Shift 2", "Sept 26, Shift 3",
+            "Sept 13, Shift 2", "Sept 19, Shift 1", "Sept 22, Shift 3",
+            "Sept 14, Shift 1", "Sept 20, Shift 2", "Sept 25, Shift 3",
+            "Sept 16, Shift 2", "Sept 17, Shift 3", "Sept 23, Shift 1",
+            "Sept 12, Shift 1", "Sept 18, Shift 3", "Sept 24, Shift 2",
+            "Sept 15, Shift 2", "Sept 21, Shift 3", "Sept 26, Shift 1",
+            "Sept 13, Shift 3", "Sept 19, Shift 2", "Sept 22, Shift 1",
+            "Sept 14, Shift 2", "Sept 20, Shift 3", "Sept 25, Shift 1",
+            "Sept 16, Shift 3", "Sept 17, Shift 1", "Sept 23, Shift 2",
+            "Sept 12, Shift 2", "Sept 18, Shift 1", "Sept 24, Shift 3",
+            "Sept 15, Shift 3", "Sept 21, Shift 1", "Sept 26, Shift 2",
+            "Sept 13, Shift 1", "Sept 19, Shift 3", "Sept 22, Shift 2",
+            "Sept 14, Shift 3", "Sept 20, Shift 1", "Sept 25, Shift 2",
+            "Sept 16, Shift 1", "Sept 17, Shift 2", "Sept 23, Shift 3"
+        ];
+        
+        // Force the browser to forget any old personal random schedules
+        localStorage.removeItem('shuffledShifts');
+        
         function formatDateRange(startDateStr, daysToAdd) {
             let d1 = new Date(startDateStr);
             let d2 = new Date(startDateStr);
